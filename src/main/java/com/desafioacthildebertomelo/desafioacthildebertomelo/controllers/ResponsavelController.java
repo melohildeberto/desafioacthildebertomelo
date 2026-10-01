@@ -3,8 +3,6 @@ package com.desafioacthildebertomelo.desafioacthildebertomelo.controllers;
 import com.desafioacthildebertomelo.desafioacthildebertomelo.models.Responsavel;
 import com.desafioacthildebertomelo.desafioacthildebertomelo.services.ResponsavelService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,23 +11,29 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/responsaveis")
-@RequiredArgsConstructor
 public class ResponsavelController {
 
     private final ResponsavelService responsavelService;
-    
 
+    public ResponsavelController(ResponsavelService responsavelService) {
+        this.responsavelService = responsavelService;
+    }
+
+    // Criar responsável
     @PostMapping
     public ResponseEntity<Responsavel> criar(@Valid @RequestBody Responsavel responsavel) {
-        // Service deve validar e-mail único
         return ResponseEntity.ok(responsavelService.criarResponsavel(responsavel));
     }
 
-    @GetMapping
-    public ResponseEntity<List<Responsavel>> listar() {
-        return ResponseEntity.ok(responsavelService.listarTodos());
+    // Atualizar responsável
+    @PutMapping("/{id}")
+    public ResponseEntity<Responsavel> atualizar(
+            @PathVariable UUID id,
+            @Valid @RequestBody Responsavel responsavelAtualizado) {
+        return ResponseEntity.ok(responsavelService.atualizarResponsavel(id, responsavelAtualizado));
     }
 
+    // Buscar por ID
     @GetMapping("/{id}")
     public ResponseEntity<Responsavel> buscarPorId(@PathVariable UUID id) {
         return responsavelService.buscarPorId(id)
@@ -37,12 +41,27 @@ public class ResponsavelController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Responsavel> atualizar(@PathVariable UUID id,
-                                                 @Valid @RequestBody Responsavel responsavel) {
-        return ResponseEntity.ok(responsavelService.atualizarResponsavel(id, responsavel));
+    // Buscar por email
+    @GetMapping("/email/{email}")
+    public ResponseEntity<Responsavel> buscarPorEmail(@PathVariable String email) {
+        return responsavelService.buscarPorEmail(email)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
+    // Listar todos
+    @GetMapping
+    public ResponseEntity<List<Responsavel>> listarTodos() {
+        return ResponseEntity.ok(responsavelService.listarTodos());
+    }
+
+    // Listar por cargo
+    @GetMapping("/cargo/{cargo}")
+    public ResponseEntity<List<Responsavel>> listarPorCargo(@PathVariable String cargo) {
+        return ResponseEntity.ok(responsavelService.listarPorCargo(cargo));
+    }
+
+    // Deletar responsável
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable UUID id) {
         responsavelService.deletarResponsavel(id);
