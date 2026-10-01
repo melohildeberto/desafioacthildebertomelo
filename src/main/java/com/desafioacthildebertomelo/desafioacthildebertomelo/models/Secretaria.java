@@ -7,6 +7,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Column;
+import jakarta.persistence.Table;
+import jakarta.persistence.Index;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -25,27 +27,38 @@ import org.hibernate.annotations.UpdateTimestamp;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(
+    name = "secretaria",
+    indexes = {
+        @Index(name = "idx_secretaria_email", columnList = "email")
+    }
+)
 public class Secretaria {
 
     @Id
     @GeneratedValue
+    @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
     @NotNull(message = "Nome da secretaria é obrigatório")
     @Size(min = 3, max = 100, message = "Nome deve ter entre 3 e 100 caracteres")
+    @Column(name = "nome", nullable = false, length = 100)
     private String nome;
 
     @NotNull(message = "E-mail da secretaria é obrigatório")
     @Email(message = "E-mail inválido")
-    @Column(unique = true)
+    @Column(name = "email", nullable = false, unique = true, length = 150)
     private String email;
 
     @Size(max = 20, message = "Telefone deve ter no máximo 20 caracteres")
+    @Column(name = "telefone", length = 20)
     private String telefone;
 
     @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 }

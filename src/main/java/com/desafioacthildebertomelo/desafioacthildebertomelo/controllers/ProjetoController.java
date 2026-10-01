@@ -3,6 +3,7 @@ package com.desafioacthildebertomelo.desafioacthildebertomelo.controllers;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,6 +13,10 @@ import com.desafioacthildebertomelo.desafioacthildebertomelo.services.ProjetoSer
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @RestController
 @RequestMapping("/api/projetos")
@@ -28,8 +33,14 @@ public class ProjetoController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Projeto>> listar() {
-        return ResponseEntity.ok(projetoService.listarTodos());
+    public ResponseEntity<Page<Projeto>> listar(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "nome") String sort) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort));
+        Page<Projeto> projetos = projetoService.listarTodos(pageable);
+        return ResponseEntity.ok(projetos);
     }
 
     @GetMapping("/{id}")

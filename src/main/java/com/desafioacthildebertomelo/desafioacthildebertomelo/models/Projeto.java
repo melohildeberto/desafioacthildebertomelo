@@ -2,19 +2,11 @@ package com.desafioacthildebertomelo.desafioacthildebertomelo.models;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Set;
 import java.util.UUID;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.GeneratedValue;
-
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
@@ -31,18 +23,27 @@ import org.hibernate.annotations.UpdateTimestamp;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(
+    name = "projeto",
+    indexes = {
+        @Index(name = "idx_projeto_status", columnList = "status")
+    }
+)
 public class Projeto {
 
     @Id
     @GeneratedValue
+    @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
     @NotNull(message = "Nome do projeto é obrigatório")
     @Size(min = 3, max = 100, message = "Nome deve ter entre 3 e 100 caracteres")
+    @Column(name = "nome", nullable = false, length = 100)
     private String nome;
 
     @Enumerated(EnumType.STRING)
     @NotNull(message = "Status é obrigatório")
+    @Column(name = "status", nullable = false, length = 30)
     private StatusProjeto status;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -54,25 +55,32 @@ public class Projeto {
     private Set<Responsavel> responsaveis;
 
     @NotNull(message = "Data de início previsto é obrigatória")
+    @Column(name = "inicio_previsto", nullable = false)
     private LocalDate inicioPrevisto;
 
     @NotNull(message = "Data de término previsto é obrigatória")
+    @Column(name = "termino_previsto", nullable = false)
     private LocalDate terminoPrevisto;
 
+    @Column(name = "inicio_realizado")
     private LocalDate inicioRealizado;
+
+    @Column(name = "termino_realizado")
     private LocalDate terminoRealizado;
 
     @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     // Calculado dinamicamente
     public long getDiasDeAtraso() {
         if (terminoRealizado != null && terminoPrevisto != null) {
             return terminoRealizado.isAfter(terminoPrevisto)
-                    ? terminoPrevisto.until(terminoRealizado).getDays()
+                    ? ChronoUnit.DAYS.between(terminoPrevisto, terminoRealizado)
                     : 0;
         }
         return 0;
@@ -80,8 +88,8 @@ public class Projeto {
 
     public double getPercentualTempoRestante() {
         if (inicioPrevisto != null && terminoPrevisto != null) {
-            long diasTotais = inicioPrevisto.until(terminoPrevisto).getDays();
-            long diasRestantes = LocalDate.now().until(terminoPrevisto).getDays();
+            long diasTotais = ChronoUnit.DAYS.between(inicioPrevisto, terminoPrevisto);
+            long diasRestantes = ChronoUnit.DAYS.between(LocalDate.now(), terminoPrevisto);
             return diasTotais > 0 ? (diasRestantes * 100.0) / diasTotais : 0;
         }
         return 0;

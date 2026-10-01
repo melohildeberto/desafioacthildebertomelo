@@ -3,6 +3,9 @@ package com.desafioacthildebertomelo.desafioacthildebertomelo.services;
 import com.desafioacthildebertomelo.desafioacthildebertomelo.models.Projeto;
 import com.desafioacthildebertomelo.desafioacthildebertomelo.models.StatusProjeto;
 import com.desafioacthildebertomelo.desafioacthildebertomelo.repositories.ProjetoRepository;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,8 +25,8 @@ public class ProjetoService {
     // ------------------- CRUD -------------------
 
     @Transactional(readOnly = true)
-    public List<Projeto> listarTodos() {
-        return projetoRepository.findAll();
+    public Page<Projeto> listarTodos(Pageable pageable) {
+        return projetoRepository.findAll(pageable);
     }
 
     @Transactional

@@ -64,7 +64,7 @@ class IndicadorServiceTest {
     @Test
     void deveRetornarPercentualConcluido() {
         Projeto p1 = Projeto.builder().status(StatusProjeto.CONCLUIDO).build();
-        Projeto p2 = Projeto.builder().status(StatusProjeto.EM_ANDAMENTO).build();
+        //Projeto p2 = Projeto.builder().status(StatusProjeto.EM_ANDAMENTO).build();
 
         when(projetoRepository.count()).thenReturn(2L);
         when(projetoRepository.findByStatus(StatusProjeto.CONCLUIDO)).thenReturn(List.of(p1));
