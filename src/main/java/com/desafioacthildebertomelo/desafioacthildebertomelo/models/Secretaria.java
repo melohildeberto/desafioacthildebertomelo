@@ -5,14 +5,12 @@ import java.util.UUID;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Column;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Email;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,32 +25,27 @@ import org.hibernate.annotations.UpdateTimestamp;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Responsavel {
+public class Secretaria {
 
     @Id
     @GeneratedValue
     private UUID id;
 
-    @NotBlank(message = "Nome é obrigatório")
+    @NotNull(message = "Nome da secretaria é obrigatório")
     @Size(min = 3, max = 100, message = "Nome deve ter entre 3 e 100 caracteres")
     private String nome;
 
-    @NotBlank(message = "Email é obrigatório")
-    @Email(message = "Email deve ser válido")
+    @NotNull(message = "E-mail da secretaria é obrigatório")
+    @Email(message = "E-mail inválido")
     @Column(unique = true)
     private String email;
 
-    @NotBlank(message = "Cargo é obrigatório")
-    private String cargo;
+    @Size(max = 20, message = "Telefone deve ter no máximo 20 caracteres")
+    private String telefone;
 
     @CreationTimestamp
-    @Column(updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
-
-    @ManyToOne
-    @JoinColumn(name = "secretaria_id")
-    private Secretaria secretaria;
 }

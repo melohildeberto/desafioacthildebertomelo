@@ -1,7 +1,10 @@
 package com.desafioacthildebertomelo.desafioacthildebertomelo.services;
 
 import com.desafioacthildebertomelo.desafioacthildebertomelo.models.Responsavel;
+import com.desafioacthildebertomelo.desafioacthildebertomelo.repositories.ProjetoRepository;
 import com.desafioacthildebertomelo.desafioacthildebertomelo.repositories.ResponsavelRepository;
+import com.desafioacthildebertomelo.desafioacthildebertomelo.repositories.SecretariaRepository;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,9 +16,15 @@ import java.util.UUID;
 public class ResponsavelService {
 
     private final ResponsavelRepository responsavelRepository;
+    private final SecretariaRepository secretariaRepository;
+    private final ProjetoRepository projetoRepository; // novo
 
-    public ResponsavelService(ResponsavelRepository responsavelRepository) {
+    public ResponsavelService(ResponsavelRepository responsavelRepository,
+                              SecretariaRepository secretariaRepository,
+                              ProjetoRepository projetoRepository) {
         this.responsavelRepository = responsavelRepository;
+        this.secretariaRepository = secretariaRepository;
+        this.projetoRepository = projetoRepository;
     }
 
     // ------------------- CRUD -------------------
@@ -31,6 +40,11 @@ public class ResponsavelService {
             throw new IllegalStateException("E-mail já cadastrado: " + responsavel.getEmail());
         }
 
+        // Validação da secretaria
+        UUID secretariaId = responsavel.getSecretaria().getId();
+        secretariaRepository.findById(secretariaId)
+                .orElseThrow(() -> new IllegalArgumentException("Secretaria não encontrada"));
+
         return responsavelRepository.save(responsavel);
     }
 
@@ -39,15 +53,20 @@ public class ResponsavelService {
         Responsavel responsavel = responsavelRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Responsável não encontrado"));
 
-        // Se o e-mail foi alterado, validar duplicidade
         if (!responsavel.getEmail().equals(responsavelAtualizado.getEmail())
                 && responsavelRepository.existsByEmail(responsavelAtualizado.getEmail())) {
             throw new IllegalStateException("E-mail já cadastrado: " + responsavelAtualizado.getEmail());
         }
 
+        // Validação da secretaria
+        UUID secretariaId = responsavelAtualizado.getSecretaria().getId();
+        secretariaRepository.findById(secretariaId)
+                .orElseThrow(() -> new IllegalArgumentException("Secretaria não encontrada"));
+
         responsavel.setNome(responsavelAtualizado.getNome());
         responsavel.setEmail(responsavelAtualizado.getEmail());
         responsavel.setCargo(responsavelAtualizado.getCargo());
+        responsavel.setSecretaria(responsavelAtualizado.getSecretaria());
 
         return responsavelRepository.save(responsavel);
     }
@@ -74,9 +93,15 @@ public class ResponsavelService {
 
     @Transactional
     public void deletarResponsavel(UUID id) {
-        if (!responsavelRepository.existsById(id)) {
-            throw new IllegalArgumentException("Responsável não encontrado");
+        Responsavel responsavel = responsavelRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Responsável não encontrado"));
+
+        // Validação: verificar se está vinculado a algum projeto
+        boolean vinculado = projetoRepository.existsByResponsaveisContains(responsavel);
+        if (vinculado) {
+            throw new IllegalStateException("Não é possível deletar: responsável vinculado a projetos");
         }
+
         responsavelRepository.deleteById(id);
     }
 }
