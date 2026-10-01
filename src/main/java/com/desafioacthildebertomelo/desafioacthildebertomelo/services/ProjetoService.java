@@ -108,10 +108,11 @@ public class ProjetoService {
         if (novo == StatusProjeto.EM_ANDAMENTO && projeto.getInicioRealizado() == null) {
             projeto.setInicioRealizado(hoje);
         }
-
         if (novo == StatusProjeto.CONCLUIDO && projeto.getTerminoRealizado() == null) {
-            projeto.setTerminoRealizado(hoje);
+            // não preencher automaticamente, lançar erro
+            throw new IllegalStateException("Não é possível concluir sem data de término realizada");
         }
+        
     }
 
     private void validarTransicao(Projeto projeto, StatusProjeto atual, StatusProjeto novo) {
