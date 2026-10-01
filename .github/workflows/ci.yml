@@ -23,6 +23,8 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: 'maven'
+      - name: Grant execute permission for mvnw
+        run: chmod +x mvnw
       - name: Run tests
         run: ./mvnw -B verify --file pom.xml
 
@@ -37,6 +39,8 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: 'maven'
+      - name: Grant execute permission for mvnw
+        run: chmod +x mvnw
       - name: SonarCloud Scan
         run: ./mvnw sonar:sonar \
           -Dsonar.projectKey=<seu-projeto> \
