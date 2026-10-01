@@ -13,7 +13,7 @@ import jakarta.persistence.Index;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.Email;
-
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -40,12 +40,12 @@ public class Secretaria {
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
-    @NotNull(message = "Nome da secretaria é obrigatório")
+    @NotBlank(message = "Nome da secretaria é obrigatório")
     @Size(min = 3, max = 100, message = "Nome deve ter entre 3 e 100 caracteres")
     @Column(name = "nome", nullable = false, length = 100)
     private String nome;
 
-    @NotNull(message = "E-mail da secretaria é obrigatório")
+    @NotBlank(message = "E-mail da secretaria é obrigatório")
     @Email(message = "E-mail inválido")
     @Column(name = "email", nullable = false, unique = true, length = 150)
     private String email;
