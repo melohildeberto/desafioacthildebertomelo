@@ -115,31 +115,31 @@ class ResponsavelServiceTest {
     }
 
     @Test
-void deveListarTodosResponsaveis() {
-    Responsavel r1 = Responsavel.builder().id(UUID.randomUUID()).nome("Ana").email("ana@teste.com").cargo("Dev").build();
-    Responsavel r2 = Responsavel.builder().id(UUID.randomUUID()).nome("Carlos").email("carlos@teste.com").cargo("Gestor").build();
+    void deveListarTodosResponsaveis() {
+        Responsavel r1 = Responsavel.builder().id(UUID.randomUUID()).nome("Ana").email("ana@teste.com").cargo("Dev").build();
+        Responsavel r2 = Responsavel.builder().id(UUID.randomUUID()).nome("Carlos").email("carlos@teste.com").cargo("Gestor").build();
 
-    Pageable pageable = PageRequest.of(0, 10);
-    when(responsavelRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(r1, r2)));
+        Pageable pageable = PageRequest.of(0, 10);
+        when(responsavelRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(r1, r2)));
 
-    Page<Responsavel> pagina = responsavelService.listarTodos(pageable);
+        Page<Responsavel> pagina = responsavelService.listarTodos(pageable);
 
-    assertEquals(2, pagina.getTotalElements());
-    assertEquals("Ana", pagina.getContent().get(0).getNome());
-}
+        assertEquals(2, pagina.getTotalElements());
+        assertEquals("Ana", pagina.getContent().get(0).getNome());
+    }
 
 
     @Test
-void deveListarPorCargo() {
-    Responsavel r1 = Responsavel.builder().id(UUID.randomUUID()).nome("Ana").email("ana@teste.com").cargo("Dev").build();
+    void deveListarPorCargo() {
+        Responsavel r1 = Responsavel.builder().id(UUID.randomUUID()).nome("Ana").email("ana@teste.com").cargo("Dev").build();
 
-    Pageable pageable = PageRequest.of(0, 10);
-    when(responsavelRepository.findByCargo("Dev", pageable)).thenReturn(new PageImpl<>(List.of(r1)));
+        Pageable pageable = PageRequest.of(0, 10);
+        when(responsavelRepository.findByCargo("Dev", pageable)).thenReturn(new PageImpl<>(List.of(r1)));
 
-    Page<Responsavel> pagina = responsavelService.listarPorCargo("Dev", pageable);
+        Page<Responsavel> pagina = responsavelService.listarPorCargo("Dev", pageable);
 
-    assertEquals(1, pagina.getTotalElements());
-    assertEquals("Dev", pagina.getContent().get(0).getCargo());
-}
+        assertEquals(1, pagina.getTotalElements());
+        assertEquals("Dev", pagina.getContent().get(0).getCargo());
+    }
 
 }
