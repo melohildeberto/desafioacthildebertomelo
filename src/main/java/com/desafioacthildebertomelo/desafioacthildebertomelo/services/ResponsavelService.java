@@ -8,9 +8,11 @@ import com.desafioacthildebertomelo.desafioacthildebertomelo.repositories.Secret
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Service
 public class ResponsavelService {
@@ -82,13 +84,13 @@ public class ResponsavelService {
     }
 
     @Transactional(readOnly = true)
-    public List<Responsavel> listarTodos() {
-        return responsavelRepository.findAll();
+    public Page<Responsavel> listarTodos(Pageable pageable) {
+        return responsavelRepository.findAll(pageable);
     }
 
     @Transactional(readOnly = true)
-    public List<Responsavel> listarPorCargo(String cargo) {
-        return responsavelRepository.findByCargo(cargo);
+    public Page<Responsavel> listarPorCargo(String cargo, Pageable pageable) {
+        return responsavelRepository.findByCargo(cargo, pageable);
     }
 
     @Transactional

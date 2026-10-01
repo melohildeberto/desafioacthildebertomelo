@@ -5,9 +5,11 @@ import com.desafioacthildebertomelo.desafioacthildebertomelo.models.Secretaria;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface ResponsavelRepository extends JpaRepository<Responsavel, UUID> {
 
@@ -18,7 +20,7 @@ public interface ResponsavelRepository extends JpaRepository<Responsavel, UUID> 
     Optional<Responsavel> findByEmail(String email);
 
     // Busca todos os responsáveis por cargo
-    List<Responsavel> findByCargo(String cargo);
+    Page<Responsavel> findByCargo(String cargo, Pageable pageable);
 
     // Novo método para validar vínculos
     boolean existsBySecretaria(Secretaria secretaria);

@@ -3,11 +3,16 @@ package com.desafioacthildebertomelo.desafioacthildebertomelo.controllers;
 import com.desafioacthildebertomelo.desafioacthildebertomelo.models.Secretaria;
 import com.desafioacthildebertomelo.desafioacthildebertomelo.services.SecretariaService;
 import jakarta.validation.Valid;
+
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 @RestController
 @RequestMapping("/api/secretarias")
@@ -45,8 +50,13 @@ public class SecretariaController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Secretaria>> listarTodas() {
-        return ResponseEntity.ok(secretariaService.listarTodas());
+    public ResponseEntity<Page<Secretaria>> listarTodas(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "nome") String sort) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort));
+        return ResponseEntity.ok(secretariaService.listarTodas(pageable));
     }
 
     @DeleteMapping("/{id}")

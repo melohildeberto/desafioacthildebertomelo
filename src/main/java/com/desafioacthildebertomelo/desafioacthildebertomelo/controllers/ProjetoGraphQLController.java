@@ -6,12 +6,15 @@ import com.desafioacthildebertomelo.desafioacthildebertomelo.services.ProjetoSer
 import com.desafioacthildebertomelo.desafioacthildebertomelo.services.ResponsavelService;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.stereotype.Controller;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Controller
 public class ProjetoGraphQLController {
@@ -25,8 +28,9 @@ public class ProjetoGraphQLController {
     }
 
     @QueryMapping
-    public List<Projeto> projetos() {
-        return projetoService.listarTodos();
+    public Page<Projeto> projetos(@Argument int page, @Argument int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return projetoService.listarTodos(pageable);
     }
 
     @QueryMapping
@@ -35,8 +39,9 @@ public class ProjetoGraphQLController {
     }
 
     @QueryMapping
-    public List<Responsavel> responsaveis() {
-        return responsavelService.listarTodos();
+     public Page<Responsavel> responsaveis(@Argument int page, @Argument int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return responsavelService.listarTodos(pageable);
     }
 
     @QueryMapping

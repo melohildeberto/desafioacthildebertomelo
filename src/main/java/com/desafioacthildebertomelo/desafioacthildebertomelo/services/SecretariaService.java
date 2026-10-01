@@ -6,9 +6,11 @@ import com.desafioacthildebertomelo.desafioacthildebertomelo.repositories.Secret
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Service
 public class SecretariaService {
@@ -66,8 +68,8 @@ public class SecretariaService {
     }
 
     @Transactional(readOnly = true)
-    public List<Secretaria> listarTodas() {
-        return secretariaRepository.findAll();
+    public Page<Secretaria> listarTodas(Pageable pageable) {
+        return secretariaRepository.findAll(pageable);
     }
 
     @Transactional

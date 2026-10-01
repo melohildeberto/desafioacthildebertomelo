@@ -6,8 +6,12 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 @RestController
 @RequestMapping("/api/responsaveis")
@@ -51,14 +55,25 @@ public class ResponsavelController {
 
     // Listar todos
     @GetMapping
-    public ResponseEntity<List<Responsavel>> listarTodos() {
-        return ResponseEntity.ok(responsavelService.listarTodos());
+    public ResponseEntity<Page<Responsavel>> listarTodos(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "nome") String sort) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort));
+        return ResponseEntity.ok(responsavelService.listarTodos(pageable));
     }
 
     // Listar por cargo
     @GetMapping("/cargo/{cargo}")
-    public ResponseEntity<List<Responsavel>> listarPorCargo(@PathVariable String cargo) {
-        return ResponseEntity.ok(responsavelService.listarPorCargo(cargo));
+    public ResponseEntity<Page<Responsavel>> listarPorCargo(
+            @PathVariable String cargo,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "nome") String sort) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort));
+        return ResponseEntity.ok(responsavelService.listarPorCargo(cargo, pageable));
     }
 
     // Deletar responsável
