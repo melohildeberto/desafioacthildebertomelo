@@ -1,6 +1,7 @@
 package com.desafioacthildebertomelo.desafioacthildebertomelo.repositories;
 
 import com.desafioacthildebertomelo.desafioacthildebertomelo.models.Responsavel;
+import com.desafioacthildebertomelo.desafioacthildebertomelo.models.Secretaria;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -18,4 +19,7 @@ public interface ResponsavelRepository extends JpaRepository<Responsavel, UUID> 
 
     // Busca todos os responsáveis por cargo
     List<Responsavel> findByCargo(String cargo);
+
+    // Novo método para validar vínculos
+    boolean existsBySecretaria(Secretaria secretaria);
 }

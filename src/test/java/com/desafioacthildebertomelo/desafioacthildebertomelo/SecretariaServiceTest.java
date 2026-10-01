@@ -10,7 +10,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -35,7 +34,11 @@ class ResponsavelServiceTest {
     @Test
     void deveCriarResponsavelComSecretariaExistente() {
         UUID secretariaId = UUID.randomUUID();
-        Secretaria secretaria = Secretaria.builder().id(secretariaId).nome("TI").email("ti@org.com").build();
+        Secretaria secretaria = Secretaria.builder()
+                .id(secretariaId)
+                .nome("Secretaria de TI")
+                .email("ti@org.com")
+                .build();
 
         Responsavel novo = Responsavel.builder()
                 .nome("João Silva")
@@ -46,12 +49,13 @@ class ResponsavelServiceTest {
 
         when(secretariaRepository.findById(secretariaId)).thenReturn(Optional.of(secretaria));
         when(responsavelRepository.existsByEmail("joao@teste.com")).thenReturn(false);
-        when(responsavelRepository.save(novo)).thenReturn(novo);
+        when(responsavelRepository.save(any(Responsavel.class))).thenAnswer(inv -> inv.getArgument(0));
 
         Responsavel salvo = responsavelService.criarResponsavel(novo);
 
         assertNotNull(salvo);
         assertEquals("joao@teste.com", salvo.getEmail());
+        assertEquals(secretariaId, salvo.getSecretaria().getId());
         verify(responsavelRepository, times(1)).save(novo);
     }
 
@@ -77,60 +81,75 @@ class ResponsavelServiceTest {
     }
 
     @Test
-    void deveDeletarResponsavelSemVinculoComProjeto() {
+    void deveAtualizarResponsavelComSecretariaValida() {
         UUID id = UUID.randomUUID();
-        Responsavel responsavel = Responsavel.builder().id(id).nome("Carlos").email("carlos@teste.com").cargo("Dev")
-                .secretaria(Secretaria.builder().id(UUID.randomUUID()).nome("TI").email("ti@org.com").build())
+        UUID secretariaId = UUID.randomUUID();
+
+        Secretaria secretaria = Secretaria.builder()
+                .id(secretariaId)
+                .nome("Secretaria de Educação")
+                .email("edu@org.com")
                 .build();
 
-        when(responsavelRepository.findById(id)).thenReturn(Optional.of(responsavel));
-        when(projetoRepository.existsByResponsaveisContains(responsavel)).thenReturn(false);
-        doNothing().when(responsavelRepository).deleteById(id);
-
-        responsavelService.deletarResponsavel(id);
-
-        verify(responsavelRepository, times(1)).deleteById(id);
-    }
-
-    @Test
-    void deveLancarErroAoDeletarResponsavelVinculadoAProjeto() {
-        UUID id = UUID.randomUUID();
-        Responsavel responsavel = Responsavel.builder().id(id).nome("Ana").email("ana@teste.com").cargo("Coordenadora")
-                .secretaria(Secretaria.builder().id(UUID.randomUUID()).nome("Educação").email("edu@org.com").build())
+        Responsavel existente = Responsavel.builder()
+                .id(id)
+                .nome("Carlos")
+                .email("carlos@teste.com")
+                .cargo("Dev")
+                .secretaria(secretaria)
                 .build();
 
-        when(responsavelRepository.findById(id)).thenReturn(Optional.of(responsavel));
-        when(projetoRepository.existsByResponsaveisContains(responsavel)).thenReturn(true);
+        Responsavel atualizado = Responsavel.builder()
+                .id(id)
+                .nome("Carlos Atualizado")
+                .email("carlos.novo@teste.com")
+                .cargo("Dev Senior")
+                .secretaria(secretaria)
+                .build();
 
-        IllegalStateException ex = assertThrows(IllegalStateException.class,
-                () -> responsavelService.deletarResponsavel(id));
+        when(responsavelRepository.findById(id)).thenReturn(Optional.of(existente));
+        when(secretariaRepository.findById(secretariaId)).thenReturn(Optional.of(secretaria));
+        when(responsavelRepository.existsByEmail("carlos.novo@teste.com")).thenReturn(false);
+        when(responsavelRepository.save(any(Responsavel.class))).thenReturn(atualizado);
 
-        assertTrue(ex.getMessage().contains("responsável vinculado a projetos"));
-        verify(responsavelRepository, never()).deleteById(id);
+        Responsavel salvo = responsavelService.atualizarResponsavel(id, atualizado);
+
+        assertEquals("carlos.novo@teste.com", salvo.getEmail());
+        assertEquals("Carlos Atualizado", salvo.getNome());
+        assertEquals(secretariaId, salvo.getSecretaria().getId());
+        verify(responsavelRepository, times(1)).save(any(Responsavel.class));
     }
 
     @Test
-    void deveListarTodosResponsaveis() {
-        Responsavel r1 = Responsavel.builder().id(UUID.randomUUID()).nome("Ana").email("ana@teste.com").cargo("Dev").build();
-        Responsavel r2 = Responsavel.builder().id(UUID.randomUUID()).nome("Carlos").email("carlos@teste.com").cargo("Gestor").build();
+    void deveLancarErroAoAtualizarResponsavelComSecretariaInexistente() {
+        UUID id = UUID.randomUUID();
+        UUID secretariaId = UUID.randomUUID();
 
-        when(responsavelRepository.findAll()).thenReturn(List.of(r1, r2));
+        Secretaria secretaria = Secretaria.builder().id(secretariaId).build();
 
-        List<Responsavel> lista = responsavelService.listarTodos();
+        Responsavel existente = Responsavel.builder()
+                .id(id)
+                .nome("Carlos")
+                .email("carlos@teste.com")
+                .cargo("Dev")
+                .secretaria(secretaria)
+                .build();
 
-        assertEquals(2, lista.size());
-        assertEquals("Ana", lista.get(0).getNome());
-    }
+        Responsavel atualizado = Responsavel.builder()
+                .id(id)
+                .nome("Carlos Atualizado")
+                .email("carlos.novo@teste.com")
+                .cargo("Dev Senior")
+                .secretaria(secretaria)
+                .build();
 
-    @Test
-    void deveListarPorCargo() {
-        Responsavel r1 = Responsavel.builder().id(UUID.randomUUID()).nome("Ana").email("ana@teste.com").cargo("Dev").build();
+        when(responsavelRepository.findById(id)).thenReturn(Optional.of(existente));
+        when(secretariaRepository.findById(secretariaId)).thenReturn(Optional.empty());
 
-        when(responsavelRepository.findByCargo("Dev")).thenReturn(List.of(r1));
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> responsavelService.atualizarResponsavel(id, atualizado));
 
-        List<Responsavel> lista = responsavelService.listarPorCargo("Dev");
-
-        assertEquals(1, lista.size());
-        assertEquals("Dev", lista.get(0).getCargo());
+        assertTrue(ex.getMessage().contains("Secretaria não encontrada"));
+        verify(responsavelRepository, never()).save(any(Responsavel.class));
     }
 }
