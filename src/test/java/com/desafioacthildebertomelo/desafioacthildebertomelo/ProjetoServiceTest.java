@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 class ProjetoServiceTest {
@@ -74,4 +75,82 @@ class ProjetoServiceTest {
 
         assertThrows(IllegalArgumentException.class, () -> projetoService.buscarPorId(id));
     }
+
+    @Test
+    void deveMudarStatusParaEmAndamento() {
+        UUID id = UUID.randomUUID();
+        Projeto projeto = Projeto.builder()
+                .id(id)
+                .nome("Projeto Teste")
+                .inicioPrevisto(LocalDate.now().minusDays(1))
+                .terminoPrevisto(LocalDate.now().plusDays(5))
+                .inicioRealizado(LocalDate.now())
+                .status(StatusProjeto.AINICIAR)
+                .build();
+
+        when(projetoRepository.findById(id)).thenReturn(Optional.of(projeto));
+        when(projetoRepository.save(any(Projeto.class))).thenReturn(projeto);
+
+        Projeto atualizado = projetoService.mudarStatus(id, StatusProjeto.EM_ANDAMENTO);
+
+        assertEquals(StatusProjeto.EM_ANDAMENTO, atualizado.getStatus());
+        verify(projetoRepository, times(1)).save(projeto);
+    }
+
+    @Test
+    void deveLancarErroSeConcluirSemTerminoRealizado() {
+        UUID id = UUID.randomUUID();
+        Projeto projeto = Projeto.builder()
+                .id(id)
+                .nome("Projeto Teste")
+                .inicioPrevisto(LocalDate.now().minusDays(10))
+                .terminoPrevisto(LocalDate.now().minusDays(1))
+                .inicioRealizado(LocalDate.now().minusDays(9))
+                .status(StatusProjeto.EM_ANDAMENTO)
+                .build();
+
+        when(projetoRepository.findById(id)).thenReturn(Optional.of(projeto));
+
+        assertThrows(IllegalStateException.class, () -> projetoService.mudarStatus(id, StatusProjeto.CONCLUIDO));
+        verify(projetoRepository, never()).save(projeto);
+    }
+    @Test
+    void deveLancarErroAoVoltarParaAINICIARDepoisDeIniciado() {
+        UUID id = UUID.randomUUID();
+        Projeto projeto = Projeto.builder()
+                .id(id)
+                .nome("Projeto Teste")
+                .inicioPrevisto(LocalDate.now().minusDays(1))
+                .inicioRealizado(LocalDate.now().minusDays(1))
+                .status(StatusProjeto.EM_ANDAMENTO)
+                .build();
+
+        when(projetoRepository.findById(id)).thenReturn(Optional.of(projeto));
+
+        assertThrows(IllegalStateException.class, () -> projetoService.mudarStatus(id, StatusProjeto.AINICIAR));
+        verify(projetoRepository, never()).save(projeto);
+    }
+
+    @Test
+    void devePermitirConclusaoComTerminoRealizado() {
+        UUID id = UUID.randomUUID();
+        Projeto projeto = Projeto.builder()
+                .id(id)
+                .nome("Projeto Teste")
+                .inicioPrevisto(LocalDate.now().minusDays(5))
+                .inicioRealizado(LocalDate.now().minusDays(4))
+                .terminoPrevisto(LocalDate.now().minusDays(1))
+                .terminoRealizado(LocalDate.now())
+                .status(StatusProjeto.EM_ANDAMENTO)
+                .build();
+
+        when(projetoRepository.findById(id)).thenReturn(Optional.of(projeto));
+        when(projetoRepository.save(any(Projeto.class))).thenReturn(projeto);
+
+        Projeto atualizado = projetoService.mudarStatus(id, StatusProjeto.CONCLUIDO);
+
+        assertEquals(StatusProjeto.CONCLUIDO, atualizado.getStatus());
+        verify(projetoRepository, times(1)).save(projeto);
+    }
+
 }

@@ -19,20 +19,19 @@ public class ProjetoService {
         this.projetoRepository = projetoRepository;
     }
 
-    // Listar todos os projetos
+    // ------------------- CRUD -------------------
+
     @Transactional(readOnly = true)
     public List<Projeto> listarTodos() {
         return projetoRepository.findAll();
     }
 
-    // Criar novo projeto
     @Transactional
     public Projeto criarProjeto(Projeto projeto) {
         atualizarStatus(projeto);
         return projetoRepository.save(projeto);
     }
 
-    // Atualizar projeto existente
     @Transactional
     public Projeto atualizarProjeto(UUID id, Projeto projetoAtualizado) {
         Projeto projeto = projetoRepository.findById(id)
@@ -48,14 +47,12 @@ public class ProjetoService {
         return projetoRepository.save(projeto);
     }
 
-    // Buscar projeto por ID
     @Transactional(readOnly = true)
     public Projeto buscarPorId(UUID id) {
         return projetoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Projeto não encontrado"));
     }
 
-    // Deletar projeto
     @Transactional
     public void deletarProjeto(UUID id) {
         if (!projetoRepository.existsById(id)) {
@@ -64,8 +61,30 @@ public class ProjetoService {
         projetoRepository.deleteById(id);
     }
 
-    // Recalcular status automaticamente
-    public void atualizarStatus(Projeto projeto) {
+    // ------------------- Kanban -------------------
+
+    @Transactional(readOnly = true)
+    public List<Projeto> listarPorStatus(StatusProjeto status) {
+        return projetoRepository.findByStatus(status);
+    }
+
+    @Transactional
+    public Projeto mudarStatus(UUID id, StatusProjeto novoStatus) {
+        Projeto projeto = projetoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Projeto não encontrado"));
+
+        StatusProjeto statusAtual = projeto.getStatus();
+
+        aplicarAcoesAutomaticas(projeto, novoStatus);
+        validarTransicao(projeto, statusAtual, novoStatus);
+
+        projeto.setStatus(novoStatus);
+        return projetoRepository.save(projeto);
+    }
+
+    // ------------------- Regras de negócio -------------------
+
+    private void atualizarStatus(Projeto projeto) {
         LocalDate hoje = LocalDate.now();
 
         if (projeto.getTerminoRealizado() != null) {
@@ -77,6 +96,47 @@ public class ProjetoService {
             projeto.setStatus(StatusProjeto.EM_ANDAMENTO);
         } else {
             projeto.setStatus(StatusProjeto.AINICIAR);
+        }
+    }
+
+    private void aplicarAcoesAutomaticas(Projeto projeto, StatusProjeto novo) {
+        LocalDate hoje = LocalDate.now();
+
+        if (novo == StatusProjeto.EM_ANDAMENTO && projeto.getInicioRealizado() == null) {
+            projeto.setInicioRealizado(hoje);
+        }
+
+        if (novo == StatusProjeto.CONCLUIDO && projeto.getTerminoRealizado() == null) {
+            projeto.setTerminoRealizado(hoje);
+        }
+    }
+
+    private void validarTransicao(Projeto projeto, StatusProjeto atual, StatusProjeto novo) {
+        LocalDate hoje = LocalDate.now();
+
+        switch (novo) {
+            case EM_ANDAMENTO:
+                if (projeto.getInicioRealizado() == null) {
+                    throw new IllegalStateException("Não é possível iniciar sem data de início realizada");
+                }
+                break;
+            case ATRASADO:
+                boolean condicaoAtraso = (projeto.getInicioPrevisto() != null && projeto.getInicioPrevisto().isBefore(hoje) && projeto.getInicioRealizado() == null)
+                        || (projeto.getTerminoPrevisto() != null && projeto.getTerminoPrevisto().isBefore(hoje) && projeto.getTerminoRealizado() == null);
+                if (!condicaoAtraso) {
+                    throw new IllegalStateException("Condições de atraso cronológico não atendidas");
+                }
+                break;
+            case CONCLUIDO:
+                if (projeto.getTerminoRealizado() == null) {
+                    throw new IllegalStateException("Não é possível concluir sem data de término realizada");
+                }
+                break;
+            case AINICIAR:
+                if (projeto.getInicioRealizado() != null || projeto.getTerminoRealizado() != null) {
+                    throw new IllegalStateException("Projeto já iniciado ou concluído, não pode voltar para 'A iniciar'");
+                }
+                break;
         }
     }
 }

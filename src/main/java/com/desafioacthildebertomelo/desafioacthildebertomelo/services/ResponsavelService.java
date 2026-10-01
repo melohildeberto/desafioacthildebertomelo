@@ -18,30 +18,30 @@ public class ResponsavelService {
         this.responsavelRepository = responsavelRepository;
     }
 
-    // Listar todos os responsáveis
-    @Transactional(readOnly = true)
-    public List<Responsavel> listarTodos() {
-        return responsavelRepository.findAll();
-    }
+    // ------------------- CRUD -------------------
 
-    // Criar novo responsável com validação de e-mail único
     @Transactional
     public Responsavel criarResponsavel(Responsavel responsavel) {
+        if (responsavel.getNome() == null || responsavel.getNome().isBlank()
+                || responsavel.getCargo() == null || responsavel.getCargo().isBlank()) {
+            throw new IllegalArgumentException("Nome e cargo são obrigatórios");
+        }
+
         if (responsavelRepository.existsByEmail(responsavel.getEmail())) {
             throw new IllegalStateException("E-mail já cadastrado: " + responsavel.getEmail());
         }
+
         return responsavelRepository.save(responsavel);
     }
 
-    // Atualizar responsável
     @Transactional
     public Responsavel atualizarResponsavel(UUID id, Responsavel responsavelAtualizado) {
         Responsavel responsavel = responsavelRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Responsável não encontrado"));
 
-        // Se o e-mail foi alterado, validar novamente
-        if (!responsavel.getEmail().equals(responsavelAtualizado.getEmail()) &&
-            responsavelRepository.existsByEmail(responsavelAtualizado.getEmail())) {
+        // Se o e-mail foi alterado, validar duplicidade
+        if (!responsavel.getEmail().equals(responsavelAtualizado.getEmail())
+                && responsavelRepository.existsByEmail(responsavelAtualizado.getEmail())) {
             throw new IllegalStateException("E-mail já cadastrado: " + responsavelAtualizado.getEmail());
         }
 
@@ -52,13 +52,26 @@ public class ResponsavelService {
         return responsavelRepository.save(responsavel);
     }
 
-    // Buscar responsável por ID
     @Transactional(readOnly = true)
     public Optional<Responsavel> buscarPorId(UUID id) {
         return responsavelRepository.findById(id);
     }
 
-    // Deletar responsável
+    @Transactional(readOnly = true)
+    public Optional<Responsavel> buscarPorEmail(String email) {
+        return responsavelRepository.findByEmail(email);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Responsavel> listarTodos() {
+        return responsavelRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Responsavel> listarPorCargo(String cargo) {
+        return responsavelRepository.findByCargo(cargo);
+    }
+
     @Transactional
     public void deletarResponsavel(UUID id) {
         if (!responsavelRepository.existsById(id)) {

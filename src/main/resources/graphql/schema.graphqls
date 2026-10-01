@@ -1,0 +1,36 @@
+type Projeto {
+    id: ID!
+    nome: String!
+    status: String!
+    inicioPrevisto: String
+    terminoPrevisto: String
+    inicioRealizado: String
+    terminoRealizado: String
+    diasDeAtraso: Int
+    percentualTempoRestante: Float
+    responsaveis: [Responsavel]
+}
+
+type Responsavel {
+    id: ID!
+    nome: String!
+    email: String!
+    cargo: String!
+}
+
+type Query {
+    projetos: [Projeto]
+    projetoPorId(id: ID!): Projeto
+    responsaveis: [Responsavel]
+    responsavelPorEmail(email: String!): Responsavel
+}
+
+type Mutation {
+    criarProjeto(nome: String!, inicioPrevisto: String!, terminoPrevisto: String!): Projeto
+    atualizarProjeto(id: ID!, nome: String, inicioPrevisto: String, terminoPrevisto: String): Projeto
+    deletarProjeto(id: ID!): Boolean
+
+    criarResponsavel(nome: String!, email: String!, cargo: String!): Responsavel
+    atualizarResponsavel(id: ID!, nome: String, email: String, cargo: String): Responsavel
+    deletarResponsavel(id: ID!): Boolean
+}
