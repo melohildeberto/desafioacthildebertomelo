@@ -28,12 +28,7 @@ public class SecretariaService {
 
     @Transactional
     public Secretaria criarSecretaria(Secretaria secretaria) {
-        if (secretaria.getNome() == null || secretaria.getNome().isBlank()) {
-            throw new IllegalArgumentException("Nome da secretaria é obrigatório");
-        }
-        if (secretaria.getEmail() == null || secretaria.getEmail().isBlank()) {
-            throw new IllegalArgumentException("E-mail da secretaria é obrigatório");
-        }
+       
         if (secretariaRepository.existsByEmail(secretaria.getEmail())) {
             throw new IllegalStateException("E-mail já cadastrado: " + secretaria.getEmail());
         }
