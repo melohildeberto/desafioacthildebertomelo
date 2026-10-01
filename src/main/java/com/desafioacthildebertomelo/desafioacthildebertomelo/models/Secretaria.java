@@ -10,7 +10,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import jakarta.persistence.Index;
 
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
