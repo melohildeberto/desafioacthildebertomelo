@@ -64,6 +64,9 @@ public class Responsavel {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name="senha", nullable = false)
+    private String senha;
+
     @ManyToOne
     @JoinColumn(name = "secretaria_id", nullable = false)
     private Secretaria secretaria;
