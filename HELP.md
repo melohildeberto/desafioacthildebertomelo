@@ -11,7 +11,7 @@ A API foi construída em **Java (Spring Boot)** e utiliza **Maven** como gerenci
 ### Pré-requisitos
 - **Java 21+**
 - **Maven 3.9+**
-- Banco de dados configurado (ex.: PostgreSQL ou H2 para testes)
+- Banco de dados configurado (ex.: MySQL ou H2 para testes)
 
 ### Executando a aplicação
 ```bash
