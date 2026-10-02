@@ -1,12 +1,14 @@
 package com.desafioacthildebertomelo.desafioacthildebertomelo.services;
 
 import com.desafioacthildebertomelo.desafioacthildebertomelo.models.Projeto;
+import com.desafioacthildebertomelo.desafioacthildebertomelo.models.Responsavel;
 import com.desafioacthildebertomelo.desafioacthildebertomelo.models.StatusProjeto;
 import com.desafioacthildebertomelo.desafioacthildebertomelo.repositories.ProjetoRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,5 +43,9 @@ public class IndicadorService {
                 .mapToLong(p -> ChronoUnit.DAYS.between(p.getInicioRealizado(), p.getTerminoRealizado()))
                 .average()
                 .orElse(0);
+    }
+
+    public Projeto buscarProjetoPorId(String id) {
+        return projetoRepository.findById(UUID.fromString(id)).get();
     }
 }

@@ -98,14 +98,21 @@
 		</dependency>
 		<!-- GraphQL (diferencial) -->
 		<dependency>
+			<groupId>com.graphql-java</groupId>
+			<artifactId>graphql-spring-boot-starter</artifactId>
+			<version>5.0.2</version>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-graphql</artifactId>
 		</dependency>
+		<!-- Ferramenta para Playground GraphQL -->
 		<dependency>
-			<groupId>com.graphql-java-kickstart</groupId>
-			<artifactId>graphiql-spring-boot-starter</artifactId>
-			<version>11.1.0</version>
+			<groupId>com.graphql-java</groupId>
+			<artifactId>graphql-java-tools</artifactId>
+			<version>5.2.4</version>
 		</dependency>
+
 	</dependencies>
 
 	<build>

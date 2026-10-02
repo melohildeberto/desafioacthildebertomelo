@@ -18,12 +18,27 @@ type Responsavel {
     cargo: String!
 }
 
+type StatusCount {
+    status: String
+    quantidade: Int
+}
+
+type StatusDelay {
+    status: String
+    mediaAtraso: Float
+}
+
 type Query {
     projetos: [Projeto]
     projetoPorId(id: ID!): Projeto
     responsaveis: [Responsavel]
     responsavelPorEmail(email: String!): Responsavel
+    projetosPorStatus: [StatusCount]
+    mediaAtrasoPorStatus: [StatusDelay]
+    percentualConcluido: Float
+    mediaDuracaoProjetos: Float
 }
+
 
 type Mutation {
     criarProjeto(nome: String!, inicioPrevisto: String!, terminoPrevisto: String!): Projeto
